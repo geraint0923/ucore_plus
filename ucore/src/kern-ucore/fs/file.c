@@ -602,7 +602,9 @@ void *linux_regfile_mmap2(void *addr, size_t len, int prot, int flags, int fd, s
 		goto out_unlock;
 	}
 	if(!(flags & MAP_ANONYMOUS)) {
-		vma_mapfile(vma, fd, off << 12, NULL);
+		struct file *fp = NULL;
+		fd2file(fd, &fp);
+		vma_mapfile(vma, fp, off << 12);
 	}
 	subret = 0;
 out_unlock:

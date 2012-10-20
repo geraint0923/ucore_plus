@@ -22,6 +22,8 @@ static wait_queue_t __wait_queue, *wait_queue = &__wait_queue;
 void
 dev_stdin_write(char c) {
     bool intr_flag;
+	if (c == '\r') 
+		c = '\n';
     if (c != '\0') {
         local_intr_save(intr_flag);
         {

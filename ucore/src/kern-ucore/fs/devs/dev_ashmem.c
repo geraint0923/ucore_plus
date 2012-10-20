@@ -43,25 +43,69 @@ struct ashmem_pin {
 #define ASHMEM_PURGE_ALL_CACHES _IO(__ASHMEMIOC, 10)
 
 
-struct ashmem_area {
+struct ashmem_area{
 	char name[ASHMEM_FULL_NAME_LEN];
-	struct list_entry_t unpinned_list;
+	list_entry_t unpinned_list;
 	struct file *file;
 	size_t size;
 	unsigned long prot_mask;
 };
 
 struct ashmem_range {
-	struct list_entry_t lru;
-	struct list_entry_t unpinned;
+	list_entry_t lru;
+	list_entry_t unpinned;
 	struct ashmem_area *asma;
 	size_t pgstart;
 	size_t pgend;
 	unsigned int purged;
 };
 
+
+
+
+// definea mutex for ashmem
+static DEFINE_MUTEX(ashmem_mutex);
+
+#define range_size(range) \
+	((range)->pgend - (range)->pgstart + 1)
+
+#define range_on_lru(range) \
+	((range)->purged == ASHMEM_NOT_PURGED)
+
+#define page_range_subsumes_range(range, start, end) \
+	(((range)->pgstart >= (start)) && ((range)->pgend <= (end)))
+
+#define page_range_subsumed_by_range(range, start, end) \
+	(((range)->pgstart <= (start)) && ((range)->pgend >= (end)))
+
+#define page_in_range(range, page) \
+	(((range)->pgstart <= (page)) && ((range)->pgend >= (page)))
+
+#define page_range_in_range(range, start, end) \
+	(page_in_range(range, start) || page_in_range(range, end) || \
+	 page_range_subsumes_range(range, start, end))
+
+#define range_before_page(range, page) \
+	((range)->pgend < (page))
+
+#define PROT_MASK       (PROT_EXEC | PROT_READ | PROT_WRITE)
+
+
+static inline void lru_addr(struct ashmem_range *range) {
+	list_add_tail(&range->lru, ashmem_lru_list);
+	lru_count += range_size(range);
+}
+
+static inline void lru_del(struct ashmem_range *range) {
+	list_del(&range->lru);
+	lru_count -= range_size(range);
+}
+
+
+
 static int
 ashmem_open(struct device *dev, uint32_t open_flags) {
+	kprintf("That is ashmem!!!");
 	return 0;
 }
 
@@ -80,6 +124,12 @@ ashmem_ioctl(struct device *dev, int op, void *data) {
 	return 0;
 }
 
+static int
+ashmem_mmap(struct device *dev, void *addr, size_t len, int prot, int flag, size_t off) {
+}
+
+
+
 static void 
 ashmem_device_init(struct device *dev) {
 	memset(dev, 0, sizeof(*dev));
@@ -89,6 +139,7 @@ ashmem_device_init(struct device *dev) {
 	dev->d_close = ashmem_close;
 	dev->d_io = ashmem_io;
 	dev->d_ioctl = ashmem_ioctl;
+	dev->d_linux_mmap = ashmem_mmap;
 }
 
 void 

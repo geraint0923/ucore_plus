@@ -604,6 +604,13 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
       goto bad_fork_cleanup_sighand;
     }
 
+	// setup group_leader
+	if (current->mm != NULL && (clone_flags & CLONE_VM))
+		proc->group_leader = proc;
+	else
+		proc->group_leader = current->group_leader;
+
+	// setup the tls
 	proc->tls_pointer = current->tls_pointer;
 
     bool intr_flag;

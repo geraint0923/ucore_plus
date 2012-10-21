@@ -7,6 +7,9 @@
 #include <atomic.h>
 #include <assert.h>
 
+//Add open_file_list
+list_entry_t open_file_list;
+
 struct inode;
 struct stat;
 struct dirent;
@@ -25,9 +28,10 @@ struct file {
     off_t pos;
     struct inode *node;
     atomic_t open_count;
+    list_entry_t open_file_link;
 };
 
-void filemap_init(struct file *filemap);
+void filemap_init(struct file **filemap);
 void filemap_open(struct file *file);
 void filemap_close(struct file *file);
 void filemap_dup(struct file *to, struct file *from);

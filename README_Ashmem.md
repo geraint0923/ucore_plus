@@ -1,5 +1,5 @@
 1. What is ashmem?
-ASHMEM means Anonymous Share Memory, which is implemented in Android to manage share memory in the kernel more effient.
+ASHMEM means Anonymous Share Memory, which is implemented in Android to manage share memory in the kernel more efficiently.
 In omap kernel provided by Google Inc., the implementation of ashmem is located in:
 include/linux/ashmem.h
 kernel/mm/ashmem.c
@@ -15,7 +15,7 @@ Here is something to do to compile it with DDE:
 	(1) Lots of unimplemented API in kernel.
 	(2) Some structs required by the origin ashmem driver
 
-3. How to implement ashmem in ucore_plus?
+4. How to implement ashmem in ucore_plus?
 We will try to implement an easy ashmem in ucore_plus, which could help initialize the dalvikvm.
 Two of the most important struct in ashmem:
 

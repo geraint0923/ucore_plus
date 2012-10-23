@@ -28,13 +28,11 @@ struct file {
     off_t pos;
     struct inode *node;
     atomic_t open_count;
-<<<<<<< HEAD
 
 // binder
     void* private_data;
-=======
+
     list_entry_t open_file_link;
->>>>>>> e838d4a4a010e1dc9c67ec3d3c226f4061b35fd0
 };
 
 void filemap_init(struct file **filemap);

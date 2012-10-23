@@ -5,6 +5,7 @@
 #include <inode.h>
 #include <unistd.h>
 #include <error.h>
+#include <stdio.h>
 
 /*
  * Called for each open().
@@ -171,6 +172,29 @@ dev_init(void) {
     init_device(disk0);
     /* for Nand flash */
     init_device(disk1);
+
+// link such as stdout
+    int ret;
+    char *new_name;
+    struct inode *old_node, *new_dir; 
+    if ((ret = vfs_lookup("stdout:", &old_node)) != 0) {
+	kprintf("erho");
+        return;// ret;
+    }
+    if ((ret = vfs_lookup_parent("/dev", &new_dir, &new_name)) != 0) {
+        vop_ref_dec(old_node);
+        return;// ret;
+    }
+
+//    if (old_node->in_fs == NULL || old_node->in_fs != new_dir->in_fs) {
+//        ret = -E_XDEV;
+//    }
+//    else {
+        ret = vop_link(new_dir, new_name, old_node);
+	kprintf("odife%d\n", ret);
+//    }
+    vop_ref_dec(old_node);
+    vop_ref_dec(new_dir);
 }
 
 /*

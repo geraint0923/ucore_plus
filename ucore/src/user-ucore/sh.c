@@ -245,6 +245,8 @@ main(int argc, char **argv) {
           __asm__ volatile(".word 0xe7f001f0");
           continue;
         }
+	
+	// interactive
         if ((pid = fork()) == 0) {
             ret = runcmd(buffer);
             exit(ret);

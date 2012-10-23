@@ -124,3 +124,41 @@ wait_current_set(wait_queue_t *queue, wait_t *wait, uint32_t wait_state) {
     wait_queue_add(queue, wait);
 }
 
+// FIXME:TODO:
+void wake_up_interruptible(wait_queue_t* wait_queue, uint32_t wait_state)
+{
+    bool intr_flag;
+    local_intr_save(intr_flag);
+    {
+//        wait_t *wait;
+//        while ((wait = wait_queue_first(wait_queue))) == NULL) {
+//            sem->value ++;
+//        }
+//        else {
+//            assert(wait->proc->wait_state == wait_state);
+//            wakeup_wait(&(sem->wait_queue), wait, wait_state, 1);
+//        }
+    }
+    local_intr_restore(intr_flag);
+}
+
+uint32_t todo_wait_interruptible(wait_queue_t* wait_queue, uint32_t wait_state)
+{
+    bool intr_flag;
+    local_intr_save(intr_flag);
+//    wait_t __wait, *wait = &__wait;
+//    wait_current_set(&wait_queue, wait, wait_state);
+    local_intr_restore(intr_flag);
+
+    schedule();
+
+    local_intr_save(intr_flag);
+//    wait_current_del(&(sem->wait_queue), wait);
+    local_intr_restore(intr_flag);
+
+//    if (wait->wakeup_flags != wait_state) {
+//        return wait->wakeup_flags;
+//    }
+    return 0;
+}
+

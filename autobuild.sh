@@ -9,14 +9,15 @@ rm -rf $BUILD_DIR_I386
 rm -rf $BUILD_DIR_ARM
 
 # Build uCore for i386
-make O=$BUILD_DIR_I386 ARCH=i386 defconfig > /dev/null && \
-make O=$BUILD_DIR_I386 kernel > /dev/null && \
-UCORE_TEST=xx make O=$BUILD_DIR_I386 sfsimg > /dev/null && \
-make O=$BUILD_DIR_I386 swapimg > /dev/null
-if [ $? -ne 0 ]; then
-    echo "build uCore for i386 failed!"
-    exit 1
-fi
+
+#make O=$BUILD_DIR_I386 ARCH=i386 defconfig > /dev/null && \
+#make O=$BUILD_DIR_I386 kernel > /dev/null && \
+#UCORE_TEST=xx make O=$BUILD_DIR_I386 sfsimg > /dev/null && \
+#make O=$BUILD_DIR_I386 swapimg > /dev/null
+#if [ $? -ne 0 ]; then
+#    echo "build uCore for i386 failed!"
+#    exit 1
+#fi
 
 # Build uCore for arm on goldfishv7
 # Disable DDE at present as it violates the checks after all user-mode processes quit

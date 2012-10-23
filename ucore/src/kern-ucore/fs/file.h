@@ -25,6 +25,9 @@ struct file {
     off_t pos;
     struct inode *node;
     atomic_t open_count;
+
+// binder
+    void* private_data;
 };
 
 void filemap_init(struct file *filemap);

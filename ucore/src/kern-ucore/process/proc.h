@@ -68,6 +68,8 @@ struct proc_struct {
 
   struct proc_signal signal_info;
 
+  struct proc_struct *group_leader;			  // the leader thread of the process
+
   void *tls_pointer;
 };
 

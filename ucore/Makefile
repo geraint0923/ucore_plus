@@ -153,10 +153,10 @@ ifneq ($(UCORE_TEST),)
 	@cp -r $(OBJPATH_ROOT)/user-ucore/testbin $(TMPSFS)
 endif
 	-cp -r $(TOPDIR)/src/user-ucore/_initial/* $(TMPSFS)
-	-cp -r /home/hu/Desktop/ucore_lib_bioniclibc/rootfs/* $(TMPSFS)
-	-cp -r $(TOPDIR)/android_test/* $(TMPSFS)
+	-cp -r ../../ucore_lib_bioniclibc/rootfs/* $(TMPSFS)
+#	-cp -r $(TOPDIR)/android_test/* $(TMPSFS)
 	@rm -f $@
-	@dd if=/dev/zero of=$@ bs=1m count=$(UCONFIG_SFS_IMAGE_SIZE)
+	@dd if=/dev/zero of=$@ bs=1M count=$(UCONFIG_SFS_IMAGE_SIZE)
 	@$(TOOLS_MKSFS) $@ $(TMPSFS)
 	@rm -rf $(TMPSFS)
 

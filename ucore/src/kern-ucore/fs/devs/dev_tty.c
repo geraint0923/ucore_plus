@@ -12,6 +12,7 @@
 #include <error.h>
 #include <assert.h>
 #include <glue_kio.h>
+#include <file.h>
 
 #define TTY_BUFSIZE               4096
 
@@ -85,7 +86,7 @@ dev_tty_read(char *buf, size_t len) {
 }
 
 static int
-tty_open(struct device *dev, uint32_t open_flags) {
+tty_open(struct device *dev, uint32_t open_flags, struct file *filp) {
 	++tty_open_count;
     return 0;
 }

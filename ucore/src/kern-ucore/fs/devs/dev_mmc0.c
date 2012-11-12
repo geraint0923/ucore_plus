@@ -9,6 +9,7 @@
 #include <iobuf.h>
 #include <error.h>
 #include <assert.h>
+#include <file.h>
 
 #define MMC0_BLKSIZE                   PGSIZE
 #define MMC0_BUFSIZE                   (4 * MMC0_BLKSIZE)
@@ -28,7 +29,7 @@ unlock_mmc0(void) {
 }
 
 static int
-mmc0_open(struct device *dev, uint32_t open_flags) {
+mmc0_open(struct device *dev, uint32_t open_flags, struct file *filp) {
     return 0;
 }
 

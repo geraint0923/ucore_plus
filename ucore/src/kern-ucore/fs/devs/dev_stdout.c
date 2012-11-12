@@ -8,9 +8,10 @@
 #include <error.h>
 #include <assert.h>
 #include <glue_kio.h>
+#include <file.h>
 
 static int
-stdout_open(struct device *dev, uint32_t open_flags) {
+stdout_open(struct device *dev, uint32_t open_flags, struct file *filp) {
     if (open_flags != O_WRONLY) {
         return -E_INVAL;
     }

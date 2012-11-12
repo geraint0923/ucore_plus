@@ -33,10 +33,11 @@
 #include <inode.h>
 #include <error.h>
 #include <assert.h>
+#include <file.h>
 
 /* For open() */
 static int
-disk1_open(struct device *dev, uint32_t open_flags) {
+disk1_open(struct device *dev, uint32_t open_flags, struct file *filp) {
     return 0;
 }
 

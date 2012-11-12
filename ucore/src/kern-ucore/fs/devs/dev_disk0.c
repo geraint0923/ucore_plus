@@ -9,6 +9,7 @@
 #include <iobuf.h>
 #include <error.h>
 #include <assert.h>
+#include <file.h>
 
 #define DISK0_BLKSIZE                   PGSIZE
 #define DISK0_BUFSIZE                   (4 * DISK0_BLKSIZE)
@@ -28,7 +29,7 @@ unlock_disk0(void) {
 }
 
 static int
-disk0_open(struct device *dev, uint32_t open_flags) {
+disk0_open(struct device *dev, uint32_t open_flags, struct file *filp) {
     return 0;
 }
 

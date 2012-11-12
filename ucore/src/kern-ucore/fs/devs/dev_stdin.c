@@ -12,6 +12,7 @@
 #include <error.h>
 #include <assert.h>
 #include <glue_kio.h>
+#include <file.h>
 
 #define STDIN_BUFSIZE               4096
 
@@ -82,7 +83,7 @@ dev_stdin_read(char *buf, size_t len) {
 }
 
 static int
-stdin_open(struct device *dev, uint32_t open_flags) {
+stdin_open(struct device *dev, uint32_t open_flags, struct file *filp) {
     if (open_flags != O_RDONLY) {
         return -E_INVAL;
     }

@@ -18,7 +18,7 @@ dev_open(struct inode *node, uint32_t open_flags) {
         return -E_INVAL;
     }
     struct device *dev = vop_info(node, device);
-    return dop_open(dev, open_flags);
+    return dop_open(dev, open_flags, NULL);
 }
 
 /*

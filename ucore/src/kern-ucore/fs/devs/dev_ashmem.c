@@ -10,6 +10,7 @@
 #include <shmem.h>
 #include <sem.h>
 #include <kio.h>
+#include <file.h>
 
 #define ASHMEM_NAME_LEN		256
 #define ASHMEM_NAME_DEF		"dev/ashmem"
@@ -154,7 +155,7 @@ static inline void range_shrink(struct ashmem_range *range,
 
 
 static int
-ashmem_open(struct device *dev, uint32_t open_flags) {
+ashmem_open(struct device *dev, uint32_t open_flags, struct file *filp) {
 	kprintf("********************That is ashmem!!!");
 
 	struct ashmem_area *asma;

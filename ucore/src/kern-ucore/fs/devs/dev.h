@@ -40,13 +40,13 @@ struct device{
     int (*d_linux_ioctl)(struct device *dev, unsigned int, unsigned long);
     void* (*d_linux_mmap)(struct device *dev, void *addr, size_t len, int unused1, int unused2, size_t off);
 
-    int (*d_open)(struct device *dev, uint32_t open_flags);
+    int (*d_open)(struct device *dev, uint32_t open_flags, struct file *filp);
     int (*d_close)(struct device *dev);
     int (*d_io)(struct device *dev, struct iobuf *iob, bool write);
     int (*d_ioctl)(struct device *dev, int op, void *data);
 };
 
-#define dop_open(dev, open_flags)           ((dev)->d_open(dev, open_flags))
+#define dop_open(dev, open_flags, filp)           ((dev)->d_open(dev, open_flags, filp))
 #define dop_close(dev)                      ((dev)->d_close(dev))
 #define dop_io(dev, iob, write)             ((dev)->d_io(dev, iob, write))
 #define dop_ioctl(dev, op, data)            ((dev)->d_ioctl(dev, op, data))

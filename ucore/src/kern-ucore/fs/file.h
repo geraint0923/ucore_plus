@@ -29,7 +29,7 @@ struct file {
     struct inode *node;
     atomic_t open_count;
 
-// binder
+// add this field for linux compatiblity
     void* private_data;
 
     list_entry_t open_file_link;

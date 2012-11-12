@@ -22,6 +22,7 @@ static wait_queue_t __wait_queue, *wait_queue = &__wait_queue;
 void
 dev_stdin_write(char c) {
     bool intr_flag;
+	extern void dev_tty_write(char c);
 	if (c == '\r') 
 		c = '\n';
     if (c != '\0') {
@@ -37,6 +38,7 @@ dev_stdin_write(char c) {
         }
         local_intr_restore(intr_flag);
     }
+	dev_tty_write(c);
 }
 
 static int

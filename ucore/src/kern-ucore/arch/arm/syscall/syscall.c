@@ -222,6 +222,7 @@ static uint32_t
 sys_open(uint32_t arg[]) {
     const char *path = (const char *)arg[0];
     uint32_t open_flags = (uint32_t)arg[1];
+kprintf("path:%s\n", path);
     return sysfile_open(path, open_flags);
 }
 
@@ -442,7 +443,7 @@ static uint32_t __sys_linux_mmap2(uint32_t arg[])
   int flags = (int)arg[3];
   int fd = (int)arg[4];
   size_t off = (size_t)arg[5];
-#ifndef UCONFIG_BIONIC_LIBC
+#ifdef UCONFIG_BIONIC_LIBC
   kprintf("TODO __sys_linux_mmap2 addr=%08x len=%08x prot=%08x flags=%08x fd=%d off=%08x\n",
       addr,len,prot,flags, fd, off);
 #endif //UCONFIG_BIONIC_LIBC

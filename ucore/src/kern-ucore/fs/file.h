@@ -30,6 +30,7 @@ struct file {
     atomic_t open_count;
 
 // binder
+    unsigned int open_flags; // dirty hack
     void* private_data;
 
     list_entry_t open_file_link;

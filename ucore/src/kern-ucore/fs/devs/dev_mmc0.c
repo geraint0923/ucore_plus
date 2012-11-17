@@ -28,12 +28,12 @@ unlock_mmc0(void) {
 }
 
 static int
-mmc0_open(struct device *dev, uint32_t open_flags) {
+mmc0_open(struct inode *nodp, struct file *filp) {
     return 0;
 }
 
 static int
-mmc0_close(struct device *dev) {
+mmc0_close(struct inode *nodp, struct file *filp) {
     return 0;
 }
 
@@ -104,7 +104,7 @@ mmc0_io(struct device *dev, struct iobuf *iob, bool write) {
 }
 
 static int
-mmc0_ioctl(struct device *dev, int op, void *data) {
+mmc0_ioctl(struct file *filp, unsigned int cmd, void* args) {
     return -E_UNIMP;
 }
 

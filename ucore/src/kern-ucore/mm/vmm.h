@@ -28,6 +28,7 @@ struct vma_struct {
     uintptr_t vm_start;      //	start addr of vma	
     uintptr_t vm_end;        // end addr of vma
     uint32_t vm_flags;       // flags of vma
+    uint32_t vm_page_prot;   // Access permissions of this VMA
     rb_node rb_link;         // redblack link which sorted by start addr of vma
     list_entry_t list_link;  // linear list link which sorted by start addr of vma
     struct shmem_struct *shmem;

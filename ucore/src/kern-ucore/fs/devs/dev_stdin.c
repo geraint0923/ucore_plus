@@ -80,15 +80,15 @@ dev_stdin_read(char *buf, size_t len) {
 }
 
 static int
-stdin_open(struct device *dev, uint32_t open_flags) {
-    if (open_flags != O_RDONLY) {
+stdin_open(struct inode *nodp, struct file *filp) {
+    if (filp->open_flags != O_RDONLY) {
         return -E_INVAL;
     }
     return 0;
 }
 
 static int
-stdin_close(struct device *dev) {
+stdin_close(struct inode *nodp, struct file *filp) {
     return 0;
 }
 
@@ -105,7 +105,7 @@ stdin_io(struct device *dev, struct iobuf *iob, bool write) {
 }
 
 static int
-stdin_ioctl(struct device *dev, int op, void *data) {
+stdin_ioctl(struct file *filp, unsigned int cmd, void* args) {
     return -E_INVAL;
 }
 

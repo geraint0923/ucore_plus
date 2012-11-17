@@ -10,15 +10,16 @@
 #include <glue_kio.h>
 
 static int
-stdout_open(struct device *dev, uint32_t open_flags) {
-    if (open_flags != O_WRONLY) {
+stdout_open(struct inode *nodp, struct file *filp) {
+    if (filp->open_flags != O_WRONLY) {
         return -E_INVAL;
     }
+
     return 0;
 }
 
 static int
-stdout_close(struct device *dev) {
+stdout_close(struct inode *nodp, struct file *filp) {
     return 0;
 }
 
@@ -35,7 +36,7 @@ stdout_io(struct device *dev, struct iobuf *iob, bool write) {
 }
 
 static int
-stdout_ioctl(struct device *dev, int op, void *data) {
+stdout_ioctl(struct file *filp, unsigned int cmd, void* args) {
     return -E_INVAL;
 }
 

@@ -88,7 +88,7 @@ struct inode *__alloc_inode(int type);
 int inode_ref_inc(struct inode *node);
 int inode_ref_dec(struct inode *node);
 int inode_open_inc(struct inode *node);
-int inode_open_dec(struct inode *node);
+int inode_open_dec(struct inode *node, struct file *filp);
 
 void inode_init(struct inode *node, const struct inode_ops *ops, struct fs *fs);
 void inode_kill(struct inode *node);
@@ -217,8 +217,8 @@ void inode_kill(struct inode *node);
  */
 struct inode_ops {
     unsigned long vop_magic;
-    int (*vop_open)(struct inode *node, uint32_t open_flags);
-    int (*vop_close)(struct inode *node);
+    int (*vop_open)(struct inode *node, struct file *filp);
+    int (*vop_close)(struct inode *node, struct file *filp);
     int (*vop_read)(struct inode *node, struct iobuf *iob);
     int (*vop_write)(struct inode *node, struct iobuf *iob);
     int (*vop_fstat)(struct inode *node, struct stat *stat);
@@ -231,7 +231,8 @@ struct inode_ops {
     int (*vop_namefile)(struct inode *node, struct iobuf *iob);
     int (*vop_getdirentry)(struct inode *node, struct iobuf *iob);
     int (*vop_reclaim)(struct inode *node);
-    int (*vop_ioctl)(struct inode *node, int op, void *data);
+    int (*vop_ioctl)(struct inode *node, struct file *filp, unsigned int cmd, void *args);
+    uintptr_t (*vop_mmap)(struct inode *node, struct file *filp, struct vma_struct *vma);
     int (*vop_gettype)(struct inode *node, uint32_t *type_store);
     int (*vop_tryseek)(struct inode *node, off_t pos);
     int (*vop_truncate)(struct inode *node, off_t len);
@@ -260,8 +261,8 @@ void inode_check(struct inode *node, const char *opstr);
         __node->in_ops->vop_##sym;                                                                  \
      })
 
-#define vop_open(node, open_flags)                                  (__vop_op(node, open)(node, open_flags))
-#define vop_close(node)                                             (__vop_op(node, close)(node))
+#define vop_open(node, filp)                                        (__vop_op(node, open)(node, filp))
+#define vop_close(node, filp)                                       (__vop_op(node, close)(node, filp))
 #define vop_read(node, iob)                                         (__vop_op(node, read)(node, iob))
 #define vop_write(node, iob)                                        (__vop_op(node, write)(node, iob))
 #define vop_fstat(node, stat)                                       (__vop_op(node, fstat)(node, stat))
@@ -274,7 +275,7 @@ void inode_check(struct inode *node, const char *opstr);
 #define vop_namefile(node, iob)                                     (__vop_op(node, namefile)(node, iob))
 #define vop_getdirentry(node, iob)                                  (__vop_op(node, getdirentry)(node, iob))
 #define vop_reclaim(node)                                           (__vop_op(node, reclaim)(node))
-#define vop_ioctl(node, op, data)                                   (__vop_op(node, ioctl)(node, op, data))
+#define vop_ioctl(node, filp, cmd, args)                            (__vop_op(node, ioctl)(node, filp, cmd, args))
 #define vop_gettype(node, type_store)                               (__vop_op(node, gettype)(node, type_store))
 #define vop_tryseek(node, pos)                                      (__vop_op(node, tryseek)(node, pos))
 #define vop_truncate(node, len)                                     (__vop_op(node, truncate)(node, len))
@@ -282,6 +283,7 @@ void inode_check(struct inode *node, const char *opstr);
 #define vop_unlink(node, name)                                      (__vop_op(node, unlink)(node, name))
 #define vop_lookup(node, path, node_store)                          (__vop_op(node, lookup)(node, path, node_store))
 #define vop_lookup_parent(node, path, node_store, endp)             (__vop_op(node, lookup_parent)(node, path, node_store, endp))
+#define vop_mmap(node, filp, vma)                                   (__vop_op(node, mmap)(node, filp, vma))
 
 #define vop_fs(node)                                                ((node)->in_fs)
 #define vop_init(node, ops, fs)                                     inode_init(node, ops, fs)
@@ -299,7 +301,7 @@ void inode_check(struct inode *node, const char *opstr);
  * Neither of these should need to be called from above the vfs layer.
  */
 #define vop_open_inc(node)                                          inode_open_inc(node)
-#define vop_open_dec(node)                                          inode_open_dec(node)
+#define vop_open_dec(node, filp)                                          inode_open_dec(node, filp)
 /* *
  * All these inode ops return int, and it's ok to cast function that take args
  * to functions that take no args.

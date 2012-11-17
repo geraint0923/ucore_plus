@@ -12,12 +12,12 @@
 #include <assert.h>
 
 static int
-pipe_inode_open(struct inode *node, uint32_t open_flags) {
-    if (open_flags & (O_TRUNC | O_APPEND)) {
+pipe_inode_open(struct inode *node, struct file *filp) {
+    if (filp->open_flags & (O_TRUNC | O_APPEND)) {
         return -E_INVAL;
     }
     struct pipe_inode *pin = vop_info(node, pipe_inode);
-    switch (open_flags & O_ACCMODE) {
+    switch (filp->open_flags & O_ACCMODE) {
     case O_RDONLY:
         return (pin->pin_type == PIN_RDONLY) ? 0 : -E_INVAL;
     case O_WRONLY:
@@ -28,7 +28,7 @@ pipe_inode_open(struct inode *node, uint32_t open_flags) {
 }
 
 static int
-pipe_inode_close(struct inode *node) {
+pipe_inode_close(struct inode *node, struct file *filp) {
     struct pipe_inode *pin = vop_info(node, pipe_inode);
     pipe_state_close(pin->state);
     return 0;
@@ -135,6 +135,7 @@ static const struct inode_ops pipe_node_ops = {
     .vop_gettype                    = pipe_inode_gettype,
     .vop_tryseek                    = NULL_VOP_INVAL,
     .vop_truncate                   = NULL_VOP_INVAL,
+    .vop_mmap                       = NULL_VOP_INVAL,
     .vop_create                     = NULL_VOP_NOTDIR,
     .vop_unlink                     = NULL_VOP_NOTDIR,
     .vop_lookup                     = NULL_VOP_NOTDIR,

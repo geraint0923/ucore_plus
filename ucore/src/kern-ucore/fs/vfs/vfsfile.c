@@ -12,8 +12,10 @@
 
 /* Does most of the work for open(). */
 int
-vfs_open(char *path, uint32_t open_flags, struct inode **node_store) {
+vfs_open(char *path, struct file *filp, struct inode **node_store) {
     bool can_write = 0;
+    uint32_t open_flags = filp->open_flags;
+
     switch (open_flags & O_ACCMODE) {
     case O_RDONLY:
         break;
@@ -51,7 +53,7 @@ vfs_open(char *path, uint32_t open_flags, struct inode **node_store) {
     }
     assert(node != NULL);
 
-    if ((ret = vop_open(node, open_flags)) != 0) {
+    if ((ret = vop_open(node, filp)) != 0) {
         vop_ref_dec(node);
         return ret;
     }
@@ -59,7 +61,7 @@ vfs_open(char *path, uint32_t open_flags, struct inode **node_store) {
     vop_open_inc(node);
     if (open_flags & O_TRUNC) {
         if ((ret = vop_truncate(node, 0)) != 0) {
-            vop_open_dec(node);
+            vop_open_dec(node, filp);
             vop_ref_dec(node);
             return ret;
         }
@@ -70,7 +72,7 @@ vfs_open(char *path, uint32_t open_flags, struct inode **node_store) {
 
 /* Does most of the work for close(). */
 int
-vfs_close(struct inode *node) {
+vfs_close(struct inode *node, struct file *filp) {
 
 /*
  * vop_open_dev and vip_ref_dev don't return errors.
@@ -86,7 +88,7 @@ vfs_close(struct inode *node) {
  *        meaningful recovery is entirely impractical.
  */
 
-    vop_open_dec(node);
+    vop_open_dec(node, filp);
     vop_ref_dec(node);
     return 0;
 }

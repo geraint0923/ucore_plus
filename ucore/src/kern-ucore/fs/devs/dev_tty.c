@@ -14,23 +14,27 @@
 #include <glue_kio.h>
 #include <file.h>
 
-#define STDIN_BUFSIZE               4096
+#define TTY_BUFSIZE               4096
 
-static char stdin_buffer[STDIN_BUFSIZE];
+static char tty_buffer[TTY_BUFSIZE];
 static off_t p_rpos, p_wpos;
 static wait_queue_t __wait_queue, *wait_queue = &__wait_queue;
 
+static int tty_open_count = 0;
+
 void
-dev_stdin_write(char c) {
+dev_tty_write(char c) {
+	if(tty_open_count <= 0)
+		return;
+
     bool intr_flag;
-	extern void dev_tty_write(char c);
 	if (c == '\r') 
 		c = '\n';
     if (c != '\0') {
         local_intr_save(intr_flag);
         {
-            stdin_buffer[p_wpos % STDIN_BUFSIZE] = c;
-            if (p_wpos - p_rpos < STDIN_BUFSIZE) {
+            tty_buffer[p_wpos % TTY_BUFSIZE] = c;
+            if (p_wpos - p_rpos < TTY_BUFSIZE) {
                 p_wpos ++;
             }
             if (!wait_queue_empty(wait_queue)) {
@@ -39,11 +43,10 @@ dev_stdin_write(char c) {
         }
         local_intr_restore(intr_flag);
     }
-	dev_tty_write(c);
 }
 
 static int
-dev_stdin_read(char *buf, size_t len) {
+dev_tty_read(char *buf, size_t len) {
     int ret = 0;
     bool intr_flag;
     local_intr_save(intr_flag);
@@ -53,7 +56,7 @@ dev_stdin_read(char *buf, size_t len) {
               break;
         try_again:
             if (p_rpos < p_wpos) {
-                char c = stdin_buffer[p_rpos % STDIN_BUFSIZE];
+                char c = tty_buffer[p_rpos % TTY_BUFSIZE];
                 //FIXME
                 kcons_putc(c);
                 *buf ++ = c;
@@ -83,60 +86,65 @@ dev_stdin_read(char *buf, size_t len) {
 }
 
 static int
-stdin_open(struct inode *nodp, struct file *filp) {
-    if (filp->open_flags != O_RDONLY) {
-        return -E_INVAL;
-    }
+tty_open(struct device *dev, uint32_t open_flags, struct file *filp) {
+	++tty_open_count;
     return 0;
 }
 
 static int
-stdin_close(struct inode *nodp, struct file *filp) {
+tty_close(struct device *dev) {
+	--tty_open_count;
     return 0;
 }
 
 static int
-stdin_io(struct device *dev, struct iobuf *iob, bool write) {
+tty_io(struct device *dev, struct iobuf *iob, bool write) {
     if (!write) {
         int ret;
-        if ((ret = dev_stdin_read(iob->io_base, iob->io_resid)) > 0) {
+        if ((ret = dev_tty_read(iob->io_base, iob->io_resid)) > 0) {
             iob->io_resid -= ret;
         }
         return ret;
-    }
+    } else {
+        char *data = iob->io_base;
+        for (; iob->io_resid != 0; iob->io_resid --) {
+            kcons_putc(*data ++);
+        }
+        return 0;
+	}
     return -E_INVAL;
 }
 
 static int
-stdin_ioctl(struct file *filp, unsigned int cmd, void* args) {
+tty_ioctl(struct device *dev, int op, void *data) {
     return -E_INVAL;
 }
 
 static void
-stdin_device_init(struct device *dev) {
+tty_device_init(struct device *dev) {
     memset(dev, 0, sizeof(*dev));
     dev->d_blocks = 0;
     dev->d_blocksize = 1;
-    dev->d_open = stdin_open;
-    dev->d_close = stdin_close;
-    dev->d_io = stdin_io;
-    dev->d_ioctl = stdin_ioctl;
+    dev->d_open = tty_open;
+    dev->d_close = tty_close;
+    dev->d_io = tty_io;
+    dev->d_ioctl = tty_ioctl;
 
     p_rpos = p_wpos = 0;
     wait_queue_init(wait_queue);
 }
 
 void
-dev_init_stdin(void) {
+dev_init_tty(void) {
     struct inode *node;
     if ((node = dev_create_inode()) == NULL) {
-        panic("stdin: dev_create_node.\n");
+        panic("tty: dev_create_node.\n");
     }
-    stdin_device_init(vop_info(node, device));
+    tty_device_init(vop_info(node, device));
 
     int ret;
-    if ((ret = vfs_add_dev("stdin", node, 0)) != 0) {
-        panic("stdin: vfs_add_dev: %e.\n", ret);
+    if ((ret = vfs_add_dev("tty", node, 0)) != 0) {
+        panic("tty: vfs_add_dev: %e.\n", ret);
     }
 }
 

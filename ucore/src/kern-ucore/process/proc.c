@@ -1084,6 +1084,7 @@ load_icode(int fd, int argc, char **kargv, int envc, char **kenvp) {
 	if(!is_dynamic) {
 		real_entry += bias;
 	}
+kprintf("real_entry:0x%08x\n", real_entry);
 
 #ifdef UCONFIG_BIONIC_LIBC
 	if(init_new_context_dynamic(current, elf, argc, kargv, envc, kenvp,

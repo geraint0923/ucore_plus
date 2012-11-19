@@ -9,6 +9,7 @@
 #include <iobuf.h>
 #include <error.h>
 #include <assert.h>
+#include <file.h>
 
 #define MMC0_BLKSIZE                   PGSIZE
 #define MMC0_BUFSIZE                   (4 * MMC0_BLKSIZE)

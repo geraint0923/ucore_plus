@@ -9,6 +9,7 @@
 #include <inode.h>
 #include <error.h>
 #include <assert.h>
+#include <file.h>
 
 /* For open() */
 static int

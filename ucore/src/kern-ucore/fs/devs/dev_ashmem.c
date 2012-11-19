@@ -10,6 +10,7 @@
 #include <shmem.h>
 #include <sem.h>
 #include <kio.h>
+#include <file.h>
 
 #define ASHMEM_NAME_LEN		256
 #define ASHMEM_NAME_DEF		"dev/ashmem"
@@ -91,8 +92,8 @@ static DEFINE_MUTEX(ashmem_mutex);
 #define PROT_MASK       (PROT_EXEC | PROT_READ | PROT_WRITE)
 
 
-static inline void lru_addr(struct ashmem_range *range) {
-	list_add_tail(&range->lru, ashmem_lru_list);
+static inline void lru_add(struct ashmem_range *range) {
+	list_add_before(ashmem_lru_list, &range->lru);
 	lru_count += range_size(range);
 }
 
@@ -101,11 +102,76 @@ static inline void lru_del(struct ashmem_range *range) {
 	lru_count -= range_size(range);
 }
 
+static int range_alloc(struct ashmem_area *asma,
+		struct ashmem_range *prev_range, unsigned int purged,
+		size_t start, size_t end) {
+	
+	struct ashmem_range *range;
+
+	range = kmalloc(sizeof(struct ashmem_range));
+	memset(range, 0, sizeof(struct ashmem_range));
+	if(!range) {
+		return -ENOMEM;
+	}
+
+	range->asma = asma;
+	range->pgstart = start;
+	range->pgend = end;
+	range->purged = purged;
+
+	list_add_before(&prev_range->unpinned, &range->unpinned);
+
+	if(range_on_lru(range)) {
+		lru_add(range);
+	}
+
+	return 0;
+}
+
+
+static void range_del(struct ashmem_range *range) {
+	list_del(&range->unpinned);
+	if(range_on_lru(range)) {
+		lru_del(range);
+	}
+	kfree(range);
+}
+
+static inline void range_shrink(struct ashmem_range *range,
+		size_t start, size_t end) {
+	
+	size_t pre = range_size(range);
+
+	range->pgstart = start;
+	range->pgend = end;
+
+	if(range_on_lru(range)) {
+		lru_count -= pre - range_size(range);
+	}
+}
+
+
+
 
 
 static int
-ashmem_open(struct device *dev, uint32_t open_flags) {
-	kprintf("That is ashmem!!!");
+ashmem_open(struct device *dev, uint32_t open_flags, struct file *filp) {
+	kprintf("********************That is ashmem!!!");
+
+	struct ashmem_area *asma;
+	int ret;
+
+	asma = kmalloc(sizeof(struct ashmem_area));
+	memset(asme, 0, sizeof(struct ashmem_area));
+	if(!asma) {
+		return -ENOMEM;
+	}
+
+	list_init(&asma->unpinned_list);
+	memcpy(asma->name, ASHMEM_NAME_PREFIX, ASHMEM_NAME_PREFIX_LEN);
+	asma->prot_mask = PROT_MASK;
+
+
 	return 0;
 }
 

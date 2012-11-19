@@ -8,6 +8,7 @@
 #include <error.h>
 #include <assert.h>
 #include <glue_kio.h>
+#include <file.h>
 
 static int
 stdout_open(struct inode *nodp, struct file *filp) {

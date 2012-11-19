@@ -174,7 +174,19 @@ int
 sysfile_writev(int fd, struct iovec __user *iov, int iovcnt) {
 	/* do nothing but return 0 */
 	kprintf("writev: fd=%08x iov=%08x iovcnt=%d\n", fd, iov, iovcnt);
-	return 0;
+	//return 0;
+	struct iovec *tv;
+	int i, rcode = 0, count = 0;
+	for (i = 0, tv = iov; i <= iovcnt; tv++) {
+		rcode = sysfile_write(fd, tv->iov_base, tv->iov_len);
+		if (rcode < 0)
+			break;
+		count += rcode;
+	}
+	if (count == 0)
+		return (rcode);
+	else
+		return (count);
 }
 
 int

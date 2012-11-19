@@ -184,6 +184,10 @@ dev_init(void) {
     /* for Nand flash */
     init_device(disk1);
 
+    init_device(tty);
+
+	//init_device(ashmem);
+
 // link such as stdout
     int ret;
     char *new_name;

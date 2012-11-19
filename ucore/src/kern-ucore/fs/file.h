@@ -31,6 +31,7 @@ struct file {
 
 // binder
     unsigned int open_flags; // dirty hack
+// add this field for linux compatiblity
     void* private_data;
 
     list_entry_t open_file_link;

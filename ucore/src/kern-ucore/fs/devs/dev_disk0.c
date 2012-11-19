@@ -9,6 +9,7 @@
 #include <iobuf.h>
 #include <error.h>
 #include <assert.h>
+#include <file.h>
 
 #define DISK0_BLKSIZE                   PGSIZE
 #define DISK0_BUFSIZE                   (4 * DISK0_BLKSIZE)

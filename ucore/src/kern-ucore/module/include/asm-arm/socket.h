@@ -15,8 +15,8 @@
 #define SO_SNDBUF	7
 #define SO_RCVBUF	8
 #define SO_SNDBUFFORCE	32
-#define SO_RCVBUFFORCE	33
 #define SO_KEEPALIVE	9
+#define SO_RCVBUFFORCE	33
 #define SO_OOBINLINE	10
 #define SO_NO_CHECK	11
 #define SO_PRIORITY	12

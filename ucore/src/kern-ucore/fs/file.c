@@ -619,6 +619,7 @@ void *linux_regfile_mmap2(void *addr, size_t len, int prot, int flags, int fd, s
 	subret = 0;
 out_unlock:
 	unlock_mm(mm);
+	kprintf("retval:0x%08x\n", start);
 	return subret == 0 ? start : -1;
 }
 

@@ -13,12 +13,13 @@
  * We reject O_CREAT | O_TRUNC | O_EXCL | O_APPEND
  */
 static int
-dev_open(struct inode *node, uint32_t open_flags) {
-    if (open_flags & (O_CREAT | O_TRUNC | O_EXCL | O_APPEND)) {
+dev_open(struct inode *node, struct file *filp) {
+    if (filp->open_flags & (O_CREAT | O_TRUNC | O_EXCL | O_APPEND)) {
         return -E_INVAL;
     }
+
     struct device *dev = vop_info(node, device);
-    return dop_open(dev, open_flags, NULL);
+    return dop_open(dev, node, filp);
 }
 
 /*
@@ -26,9 +27,9 @@ dev_open(struct inode *node, uint32_t open_flags) {
  * Just pass through.
  */
 static int
-dev_close(struct inode *node) {
+dev_close(struct inode *node, struct file *filp) {
     struct device *dev = vop_info(node, device);
-    return dop_close(dev);
+    return dop_close(dev, node, filp);
 }
 
 /*
@@ -53,9 +54,18 @@ dev_write(struct inode *node, struct iobuf *iob) {
  * Called for ioctl(). Just pass through.
  */
 static int
-dev_ioctl(struct inode *node, int op, void *data) {
+dev_ioctl(struct inode *node, struct file *filp, unsigned int cmd, void *data) {
     struct device *dev = vop_info(node, device);
-    return dop_ioctl(dev, op, data);
+    return dop_ioctl(dev, filp, cmd, data);
+}
+
+/*
+ * Called for mmap. Just pass through
+ */
+static int
+dev_mmap(struct inode *node, struct file *filp, struct vma_struct *vma) {
+    struct device *dev = vop_info(node, device);
+    return dop_mmap(dev, filp, vma);
 }
 
 /*
@@ -156,6 +166,7 @@ static const struct inode_ops dev_node_ops = {
     .vop_unlink                     = NULL_VOP_NOTDIR,
     .vop_lookup                     = dev_lookup,
     .vop_lookup_parent              = NULL_VOP_NOTDIR,
+    .vop_mmap                       = dev_mmap,
 };
 
 #define init_device(x)                                  \

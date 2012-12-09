@@ -71,7 +71,7 @@ filemap_free(struct file *file) {
     assert(file->status == FD_INIT || file->status == FD_CLOSED);
     assert(fopen_count(file) == 0);
     if (file->status == FD_CLOSED) {
-        vfs_close(file->node);
+        vfs_close(file->node, file);
     }
     file->status = FD_NONE;
     //delete from openfilelist
@@ -181,6 +181,7 @@ file_testfd(int fd, bool readable, bool writable) {
 
 int
 file_open(char *path, uint32_t open_flags) {
+
     bool readable = 0, writable = 0;
     switch (open_flags & O_ACCMODE) {
     case O_RDONLY: readable = 1; break;
@@ -197,9 +198,11 @@ file_open(char *path, uint32_t open_flags) {
     if ((ret = filemap_alloc(NO_FD, &file)) != 0) {
         return ret;
     }
+    //
+    file->open_flags = open_flags;
 
     struct inode *node;
-    if ((ret = vfs_open(path, open_flags, &node)) != 0) {
+    if ((ret = vfs_open(path, file, &node)) != 0) {
         filemap_free(file);
         return ret;
     }
@@ -208,17 +211,19 @@ file_open(char *path, uint32_t open_flags) {
     if (open_flags & O_APPEND) {
         struct stat __stat, *stat = &__stat;
         if ((ret = vop_fstat(node, stat)) != 0) {
-            vfs_close(node);
+            vfs_close(node, file);
             filemap_free(file);
             return ret;
         }
         file->pos = stat->st_size;
     }
 
+
     file->node = node;
     file->readable = readable;
     file->writable = writable;
     filemap_open(file);
+
     return file->fd;
 }
 
@@ -358,6 +363,8 @@ file_getdirentry(int fd, struct dirent *direntp) {
 
 int
 file_dup(int fd1, int fd2) {
+kprintf("HAO\n");
+
     int ret;
     struct file *file1, *file2;
     if ((ret = fd2file(fd1, &file1)) != 0) {
@@ -367,6 +374,8 @@ file_dup(int fd1, int fd2) {
         return ret;
     }
     filemap_dup(file2, file1);
+kprintf("HDe!\n");
+
     return file2->fd;
 }
 
@@ -422,6 +431,7 @@ file_mkfifo(const char *__name, uint32_t open_flags) {
     if ((ret = filemap_alloc(NO_FD, &file)) != 0) {
         return ret;
     }
+    file->open_flags = open_flags;
 
     char *name;
     const char *device = readonly ? "pipe:r_" : "pipe:w_";
@@ -431,7 +441,7 @@ file_mkfifo(const char *__name, uint32_t open_flags) {
         goto failed_cleanup_file;
     }
 
-    if ((ret = vfs_open(name, open_flags, &(file->node))) != 0) {
+    if ((ret = vfs_open(name, file, &(file->node))) != 0) {
         goto failed_cleanup_name;
     }
     file->pos = 0;
@@ -533,6 +543,59 @@ int linux_devfile_ioctl(int fd, unsigned int cmd, unsigned long arg)
   ret = dev->d_linux_ioctl(dev, cmd, arg);
   filemap_release(file);
   return ret;
+}
+
+uintptr_t
+file_mmap2(uintptr_t addr, size_t len, uint32_t prot, uint32_t flags, int fd, size_t pgoff)
+{
+    int ret = 0;
+    struct file *file;
+    if ((ret = fd2file(fd, &file)) != 0) {
+        goto out;
+    }
+
+    struct mm_struct *mm = pls_read(current)->mm;
+    if (mm == NULL)
+        goto out;
+
+    lock_mm(mm);
+
+    if (addr == 0) {
+        if ((addr = get_unmapped_area(mm, len)) == 0) {
+            goto out_unlock;
+        }
+    }
+
+    struct vma_struct *vma;
+    if (mm_map(mm, addr, len, flags, &vma) != 0)
+        goto out_unlock;
+
+    vma->vm_page_prot = prot;
+    vma->mfile.file = file;
+    vma->mfile.offset = pgoff;
+
+    unlock_mm(mm);
+
+    // mmap
+
+    filemap_acquire(file);
+
+    void* r;
+    if ((r = vop_mmap(file->node, file, vma)) == NULL) {
+        goto out_vma;
+    }
+
+    filemap_release(file);
+
+    return r;
+
+out_vma:
+    filemap_release(file);
+    // FIXME: mmap failed, remove vma ???
+out_unlock:
+    unlock_mm(mm);
+out:
+    return NULL;
 }
 
 void *linux_devfile_mmap2(void *addr, size_t len, int prot, int flags, int fd, size_t pgoff)

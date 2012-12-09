@@ -13,13 +13,13 @@
 
 /* For open() */
 static int
-null_open(struct device *dev, uint32_t open_flags, struct file *filp) {
+null_open(struct inode *nodp, struct file *filp) {
     return 0;
 }
 
 /* For close() */
 static int
-null_close(struct device *dev) {
+null_close(struct inode *nodp, struct file *filp) {
     return 0;
 }
 
@@ -38,7 +38,7 @@ null_io(struct device *dev, struct iobuf *iob, bool write) {
 
 /* For ioctl() */
 static int
-null_ioctl(struct device *dev, int op, void *data) {
+null_ioctl(struct file *filp, unsigned int cmd, void* args) {
     return -E_INVAL;
 }
 

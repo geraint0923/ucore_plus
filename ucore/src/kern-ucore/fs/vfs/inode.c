@@ -88,11 +88,11 @@ inode_open_inc(struct inode *node) {
  * calls vop_close if the open_count hits zero
  * */
 int
-inode_open_dec(struct inode *node) {
+inode_open_dec(struct inode *node, struct file *filp) {
     assert(inode_open_count(node) > 0);
     int open_count, ret;
     if ((open_count = atomic_sub_return(&(node->open_count), 1)) == 0) {
-        if ((ret = vop_close(node)) != 0) {
+        if ((ret = vop_close(node, filp)) != 0) {
             kprintf("vfs: warning: vop_close: %e.\n", ret);
         }
     }

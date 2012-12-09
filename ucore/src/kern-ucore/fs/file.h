@@ -29,6 +29,8 @@ struct file {
     struct inode *node;
     atomic_t open_count;
 
+// binder
+    unsigned int open_flags; // dirty hack
 // add this field for linux compatiblity
     void* private_data;
 

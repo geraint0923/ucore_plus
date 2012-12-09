@@ -527,8 +527,8 @@ sfs_lookup_once(struct sfs_fs *sfs, struct sfs_inode *sin, const char *name, str
 }
 
 static int
-sfs_opendir(struct inode *node, uint32_t open_flags) {
-    switch (open_flags & O_ACCMODE) {
+sfs_opendir(struct inode *node, struct file *filp) {
+    switch (filp->open_flags & O_ACCMODE) {
     case O_RDONLY:
         break;
     case O_WRONLY:
@@ -536,19 +536,19 @@ sfs_opendir(struct inode *node, uint32_t open_flags) {
     default:
         return -E_ISDIR;
     }
-    if (open_flags & O_APPEND) {
+    if (filp->open_flags & O_APPEND) {
         return -E_ISDIR;
     }
     return 0;
 }
 
 static int
-sfs_openfile(struct inode *node, uint32_t open_flags) {
+sfs_openfile(struct inode *node, struct file *filp) {
     return 0;
 }
 
 static int
-sfs_close(struct inode *node) {
+sfs_close(struct inode *node, struct file *filp) {
     return vop_fsync(node);
 }
 
@@ -1358,6 +1358,12 @@ sfs_lookup_parent(struct inode *node, char *path, struct inode **node_store, cha
     }
 }
 
+static uintptr_t
+sfs_mmap(struct inode *node, struct file *filp, struct vma_struct *vma) {
+    return NULL;
+}
+
+
 static const struct inode_ops sfs_node_dirops = {
     .vop_magic                      = VOP_MAGIC,
     .vop_open                       = sfs_opendir,
@@ -1375,6 +1381,7 @@ static const struct inode_ops sfs_node_dirops = {
     .vop_getdirentry                = sfs_getdirentry,
     .vop_reclaim                    = sfs_reclaim,
     .vop_ioctl                      = NULL_VOP_INVAL,
+    .vop_mmap                       = NULL_VOP_ISDIR,
     .vop_gettype                    = sfs_gettype,
     .vop_tryseek                    = NULL_VOP_ISDIR,
     .vop_truncate                   = NULL_VOP_ISDIR,
@@ -1408,5 +1415,6 @@ static const struct inode_ops sfs_node_fileops = {
     .vop_unlink                     = NULL_VOP_NOTDIR,
     .vop_lookup                     = NULL_VOP_NOTDIR,
     .vop_lookup_parent              = NULL_VOP_NOTDIR,
+    .vop_mmap                       = sfs_mmap,
 };
 

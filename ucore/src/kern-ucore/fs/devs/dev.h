@@ -2,6 +2,9 @@
 #define __KERN_FS_DEVS_DEV_H__
 
 #include <types.h>
+#include <file.h>
+//#include <vmm.h>
+struct vma_struct;
 
 struct inode;
 struct iobuf;
@@ -40,16 +43,20 @@ struct device{
     int (*d_linux_ioctl)(struct device *dev, unsigned int, unsigned long);
     void* (*d_linux_mmap)(struct device *dev, void *addr, size_t len, int unused1, int unused2, size_t off);
 
-    int (*d_open)(struct device *dev, uint32_t open_flags, struct file *filp);
-    int (*d_close)(struct device *dev);
-    int (*d_io)(struct device *dev, struct iobuf *iob, bool write);
-    int (*d_ioctl)(struct device *dev, int op, void *data);
+    int (*d_open)(struct inode *nodp, struct file *filp);
+    int (*d_close)(struct inode *nodp, struct file *filp);
+    int (*d_mmap)(struct file *filp, struct vma_struct *vma);
+    int (*d_io)(struct device *dev, struct iobuf *iob, bool write); //?
+    int (*d_ioctl)(struct file *filp, unsigned int cmd, void* args);
+    int (*d_flush)(struct file *filp, uint32_t id); //?
 };
 
-#define dop_open(dev, open_flags, filp)           ((dev)->d_open(dev, open_flags, filp))
-#define dop_close(dev)                      ((dev)->d_close(dev))
-#define dop_io(dev, iob, write)             ((dev)->d_io(dev, iob, write))
-#define dop_ioctl(dev, op, data)            ((dev)->d_ioctl(dev, op, data))
+#define dop_open(dev, nodep, filp)                 ((dev)->d_open(nodep, filp))
+#define dop_close(dev, nodep, filp)                ((dev)->d_close(nodep, filp))
+#define dop_io(dev, iob, write)                    ((dev)->d_io(dev, iob, write))
+#define dop_ioctl(dev, filp, cmd, args)            ((dev)->d_ioctl(filp, cmd, args))
+#define dop_mmap(dev, filp, vma)                   ((dev)->d_mmap(filp, vma))
+#define dop_flush(dev, filp, id)                   ((dev)->d_flush(filp, id))
 
 #define dev_is_linux_dev(dev) ((dev)->linux_dentry != NULL)
 

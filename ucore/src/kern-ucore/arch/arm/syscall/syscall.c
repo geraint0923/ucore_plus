@@ -352,7 +352,7 @@ sys_linux_mmap(uint32_t arg[])
   size_t len = arg[1];
   int fd = (int)arg[2];
   size_t off = (size_t)arg[3];
-  return (uint32_t)sysfile_linux_mmap2(addr, len, 0,0,fd, off);
+  return (uint32_t)sysfile_linux_mmap2(addr, len, 0, 0, fd, off);
 }
 
 static uint32_t
@@ -437,10 +437,10 @@ static uint32_t __sys_linux_ioctl(uint32_t args[])
 static uint32_t __sys_linux_mmap2(uint32_t arg[])
 {
   //TODO
-  void *addr = (void*)arg[0];
+  uintptr_t addr = (uintptr_t)arg[0];
   size_t len = arg[1];
-  int prot = (int)arg[2];
-  int flags = (int)arg[3];
+  uint32_t prot = (uint32_t)arg[2];
+  uint32_t flags = (uint32_t)arg[3];
   int fd = (int)arg[4];
   size_t off = (size_t)arg[5];
 #ifdef UCONFIG_BIONIC_LIBC
@@ -454,7 +454,6 @@ static uint32_t __sys_linux_mmap2(uint32_t arg[])
 		return linux_regfile_mmap2(addr, len, prot, flags, fd, off);
 	}
 #endif //UCONFIG_BIONIC_LIBC
-
 
     uint32_t ucoreflags = 0;
     if(prot & PROT_WRITE)

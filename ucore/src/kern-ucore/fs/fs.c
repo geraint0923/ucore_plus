@@ -13,6 +13,7 @@ void
 fs_init(void) {
     vfs_init();
     dev_init();
+    devdir_init();
     pipe_init();
     sfs_init();
     list_init(&open_file_list);

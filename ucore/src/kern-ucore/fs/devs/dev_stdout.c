@@ -11,7 +11,7 @@
 
 static int
 stdout_open(struct device *dev, uint32_t open_flags) {
-    if (open_flags != O_WRONLY) {
+    if (!(open_flags & O_WRONLY)) {
         return -E_INVAL;
     }
     return 0;

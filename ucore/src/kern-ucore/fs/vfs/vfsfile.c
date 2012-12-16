@@ -55,7 +55,6 @@ vfs_open(char *path, uint32_t open_flags, struct inode **node_store) {
         vop_ref_dec(node);
         return ret;
     }
-
     vop_open_inc(node);
     if (open_flags & O_TRUNC) {
         if ((ret = vop_truncate(node, 0)) != 0) {

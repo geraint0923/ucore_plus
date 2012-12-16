@@ -59,3 +59,7 @@ struct inode *dev_create_inode(void);
 
 #endif /* !__KERN_FS_DEVS_DEV_H__ */
 
+void devdir_init(void);
+struct inode *devdir_inode;
+struct inode *devdir_create_inode(void);
+

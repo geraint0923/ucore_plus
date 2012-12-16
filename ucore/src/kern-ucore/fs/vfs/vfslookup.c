@@ -15,6 +15,13 @@
  */
 static int
 get_device(char *path, char **subpath, struct inode **node_store) {
+    if(0 == strncmp(path,"/dev/std",strlen("/dev/std"))) {
+        *node_store = devdir_inode;
+        char* tmp = path + strlen("/dev/");
+        *subpath = tmp;
+        return 0;
+    }
+
     int i, slash = -1, colon = -1;
     /*
      * Locate the first colon or slash.

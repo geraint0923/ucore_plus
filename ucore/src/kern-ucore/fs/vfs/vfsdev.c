@@ -46,7 +46,7 @@ typedef struct {
 #define le2vdev(le, member)                         \
     to_struct((le), vfs_dev_t, member)
 
-static list_entry_t vdev_list;
+list_entry_t vdev_list;
 static semaphore_t vdev_list_sem;
 
 static void

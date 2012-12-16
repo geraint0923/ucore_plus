@@ -81,7 +81,7 @@ dev_stdin_read(char *buf, size_t len) {
 
 static int
 stdin_open(struct device *dev, uint32_t open_flags) {
-    if (open_flags != O_RDONLY) {
+    if (!(open_flags &= O_RDONLY)) {
         return -E_INVAL;
     }
     return 0;

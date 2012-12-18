@@ -119,6 +119,7 @@ vma_create(uintptr_t vm_start, uintptr_t vm_end, uint32_t vm_flags) {
     vma->shmem_off = 0;
 #ifdef UCONFIG_BIONIC_LIBC
 	vma->mfile.file = NULL;
+	vma->vm_file = NULL;
 #endif //UCONFIG_BIONIC_LIBC
   }
   return vma;

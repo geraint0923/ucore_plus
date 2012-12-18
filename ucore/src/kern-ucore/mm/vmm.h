@@ -35,6 +35,8 @@ struct vma_struct {
     size_t shmem_off;
 #ifdef UCONFIG_BIONIC_LIBC
 	struct mapped_file_struct mfile;
+	struct file *vm_file;
+	uint32_t vm_pgoff;
 #endif //UCONFIG_BIONIC_LIBC
 };
 

@@ -458,6 +458,7 @@ static uint32_t __sys_linux_mmap2(uint32_t arg[])
     uint32_t ucoreflags = 0;
     if(prot & PROT_WRITE)
       ucoreflags |= MMAP_WRITE;
+	kprintf("do_linux_mmap!!!\n");
     int ret = __do_linux_mmap((uintptr_t)&addr, len, ucoreflags);
     //kprintf("@@@ ret=%d %e %08x\n", ret,ret, addr);
     if(ret)
@@ -465,6 +466,7 @@ static uint32_t __sys_linux_mmap2(uint32_t arg[])
     //kprintf("__sys_linux_mmap2 ret=%08x\n", addr);
     return addr;
   }else{
+	  kprintf("sysfile_linux_mmap2???");
     return (uint32_t)sysfile_linux_mmap2(addr, len, prot, flags,fd, off);
   }
 }

@@ -554,14 +554,15 @@ void* sysfile_linux_mmap2(void *addr, size_t len, int prot, int flags,
     return MAP_FAILED;
   }
 
-#ifdef UCONFIG_BIONIC_LIBC
-//  if(__is_linux_devfile(fd)){
-//	return linux_devfile_mmap2(addr, len, prot, flags, fd, pgoff);
-//  }
 //#ifdef UCONFIG_BIONIC_LIBC
-//  else {
-    return file_mmap2(addr, len, prot, flags, fd, pgoff);
-//  }
+  if(__is_linux_devfile(fd)){
+	return linux_devfile_mmap2(addr, len, prot, flags, fd, pgoff);
+  }
+#ifdef UCONFIG_BIONIC_LIBC
+  else {
+	  return linux_regfile_mmap2(addr, len, prot, flags, fd, pgoff);
+ //   return file_mmap2(addr, len, prot, flags, fd, pgoff);
+  }
 #endif //UCONFIG_BIONIC_LIBC
   return MAP_FAILED;
 }

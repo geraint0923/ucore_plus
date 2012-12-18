@@ -592,10 +592,12 @@ file_mmap2(uintptr_t addr, size_t len, uint32_t prot, uint32_t flags, int fd, si
 out_vma:
     filemap_release(file);
     // FIXME: mmap failed, remove vma ???
+	return -1;
+
 out_unlock:
     unlock_mm(mm);
 out:
-    return NULL;
+    return -1;
 }
 
 void *linux_devfile_mmap2(void *addr, size_t len, int prot, int flags, int fd, size_t pgoff)

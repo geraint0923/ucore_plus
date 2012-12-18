@@ -1360,8 +1360,76 @@ sfs_lookup_parent(struct inode *node, char *path, struct inode **node_store, cha
 
 static uintptr_t
 sfs_mmap(struct inode *node, struct file *filp, struct vma_struct *vma) {
-    return NULL;
+	kprintf("I am invoked?\n");
+
+	/*
+	int prot = vma->vm_page_prot;
+	size_t off = vma->mfile.offset;
+
+void *linux_regfile_mmap2(void *addr, size_t len, int prot, int flags, int fd, size_t off)
+{
+	int subret = -E_INVAL;
+	struct mm_struct *mm = pls_read(current)->mm;
+	assert(mm != NULL);
+	if(len == 0) {
+		return -1;
+	}
+	lock_mm(mm);
+
+	uintptr_t start = ROUNDDOWN(addr, PGSIZE);
+	len = ROUNDUP(len, PGSIZE);
+
+	uint32_t vm_flags = VM_READ;
+	if(prot & PROT_WRITE) {
+		vm_flags |= VM_WRITE;
+	}
+	if(prot & PROT_EXEC) {
+		vm_flags |= VM_EXEC;
+	}
+	if(flags & MAP_STACK) {
+		vm_flags |= VM_STACK;
+	}
+	if(flags & MAP_ANONYMOUS) {
+		vm_flags |= VM_ANONYMOUS;
+	}
+
+	subret = -E_NO_MEM;
+	if(start == 0 && (start = get_unmapped_area(mm, len)) == 0) {
+		goto out_unlock;
+	}
+	uintptr_t end = start + len;
+	struct vma_struct *vma = find_vma(mm, start);
+	if(vma == NULL || vma->vm_start >= end) {
+		vma = NULL;
+	} else if(!(flags & MAP_FIXED)) {
+		start = get_unmapped_area(mm, len);
+		vma = NULL;
+	} else if(!(vma->vm_flags & VM_ANONYMOUS)) {
+		goto out_unlock;
+	} else if(vma->vm_start == start && end == vma->vm_end) {
+		vma->vm_flags = vm_flags;
+	} else {
+		assert(vma->vm_start <= start && end <= vma->vm_end);
+		if((subret = mm_unmap_keep_pages(mm, start, len)) != 0) {
+			goto out_unlock;
+		}
+		vma = NULL;
+	}
+	if(vma == NULL && (subret = mm_map(mm, start, len, vm_flags, &vma)) != 0) {
+		goto out_unlock;
+	}
+	if(!(flags & MAP_ANONYMOUS)) {
+		vma_mapfile(vma, filp, off << 12);
+	}
+	subret = 0;
+out_unlock:
+	unlock_mm(mm);
+	kprintf("retval:0x%08x\n", start);
+	return subret == 0 ? start : -1;
+	*/
+	return NULL;
 }
+
 
 
 static const struct inode_ops sfs_node_dirops = {

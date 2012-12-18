@@ -1,1 +1,1 @@
-obj-y := shmem.o slab.o swap.o vmm.o
+obj-y := shmem.o slab.o swap.o vmm.o mmap.o

@@ -194,3 +194,31 @@ create->pointer
 * seq_file 因为/proc被删所以 useless
 
 vm_operations_struct (closed?)
+
+## 传输对象
+在binder中传输的内容可以是任意的，但是由一些特殊的传输对象会被Binder驱动所处理。主要考虑到的对象是binder本身的传递和文件的传递。
+
+### binder 本身的传递
+使用特殊的参数，可以在binder传输的数据中加入binder。驱动会检测到这个binder对象在被传递，并改变维护内核的一些量。另外，会查询内核使得在client和server看来都
+有相同的语义。即把客户端的binder对象的handleID替换成服务端的binder对象的指针。
+
+### 文件FD的传输
+binder还提供关于文件FD的传输功能，用于实现文件的共享。这个功能在ashmem中就被用到了。它的基本机制是使用内核的机制，将同一个file对象连接到
+两个进程的fs_struct结构中。
+
+# 进度
+## 已经完成的部分
+* binder驱动和用户态库已经基本完成，目前还没有调试正确，已经得到确认的出错概率不大的功能有：
+** mmap不怀疑有问题
+** ioctl的引用计数部分不怀疑有问题，发送接收的逻辑没有问题。
+** 现在的问题主要集中在rb_tree的各种bug上。
+
+## 存在的bug
+## 仍需要完善的部分
+* 目前的wait_queue使用的是基于原来ucore的静态wait_queue包装的几个方法，这几个函数是从linux的wait_queue中拷贝并修改而来，
+因为做的比较粗糙，所以并没有添加到ucore的wait_queue中而是单独放在了binder驱动中，最好需要将其合并到wait.c中，作为ucore
+的wait_queue的一个完善。
+* binder 按需内存分配，如上所述，binder的通信用内存目前是一次性分配的，这不科学。可以考虑在highmem可以使用后将其改为按需分配。
+* 
+# 结语
+很遗憾在最后都没有调试通过。之后我抽空调出来了会更新这里的。
